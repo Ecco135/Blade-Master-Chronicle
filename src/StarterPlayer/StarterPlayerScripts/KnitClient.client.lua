@@ -2,14 +2,19 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local StarterPlayerScripts = StarterPlayer.StarterPlayerScripts
 
-local Knit = require(ReplicatedStorage.Pakcages.Knit)
+local Knit = require(ReplicatedStorage.Packages.Knit)
+local Component = require(ReplicatedStorage.Packages.Component)
 
 --Knit.AddController(ServerStorage.Money)
-for _, v in ipairs(StarterPlayerScripts.Client:GetDescendants()) do
-	if v:IsA("ModuleScript") and v.Name:match("Controller$") then --check if it is module and ending with controller
+Knit.AddControllers(script.Parent.Controller)
+
+for _, v in ipairs(StarterPlayerScripts.Client.Components:GetDescendants()) do
+	if v:IsA("ModuleScript") then --check if it is module and ending with controller
 		require(v)
 	end
 end
+
+--require(StarterPlayerScripts.Client.Components.Sword)
 
 Knit.Start()
 	:andThen(function()

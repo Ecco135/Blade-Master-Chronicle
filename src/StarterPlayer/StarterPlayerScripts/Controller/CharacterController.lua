@@ -1,6 +1,6 @@
 local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Knit = require(ReplicatedStorage.Pakcages.Knit)
+local Knit = require(ReplicatedStorage.Packages.Knit)
 local UserInputService = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 
@@ -181,8 +181,6 @@ function CharacterController:KnitStart()
 	Humanoid.StateChanged:Connect(airJumpState)
 end
 
-function CharacterController:KnitInit()
-
-end
+function CharacterController:KnitInit() end
 
 return CharacterController

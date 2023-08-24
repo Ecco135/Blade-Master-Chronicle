@@ -1,6 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Knit = require(ReplicatedStorage.Pakcages.Knit)
+local Knit = require(ReplicatedStorage.Packages.Knit)
 local DashEvent = ReplicatedStorage.VFX.MotionEffect:WaitForChild("DashEvent")
 local JumpEvent = ReplicatedStorage.VFX.MotionEffect:WaitForChild("JumpEvent")
 

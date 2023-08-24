@@ -1,22 +1,20 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Knit = require(ReplicatedStorage.Pakcages.Knit)
+local Knit = require(ReplicatedStorage.Packages.Knit)
 
-local ArenaService = Knit.CreateService{
-    Name = "ArenaService";
-    Client = {};
-}
+local ArenaService = Knit.CreateService({
+	Name = "ArenaService",
+	Client = {},
+})
 
-function ArenaService:StartGame()
-
-end
+function ArenaService:StartGame() end
 
 function ArenaService:KnitInit()
-    print("ArenaService initialized")
+	print("ArenaService initialized")
 end
 
 function ArenaService:KnitStart()
-    print("ArenaService started")
+	print("ArenaService started")
 end
 
 return ArenaService
