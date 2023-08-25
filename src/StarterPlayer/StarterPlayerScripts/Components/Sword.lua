@@ -18,11 +18,11 @@ local animationTrack
 local stopCount = 0
 
 local swordL = {
-	"rbxassetid://14551631550",
-	"rbxassetid://14551799761",
-	--	"rbxassetid://14541013367",
-	--	"rbxassetid://14541021537",
-	--	"rbxassetid://14541027799",
+	"rbxassetid://14559104190",
+	"rbxassetid://14559111016",
+	"rbxassetid://14559198134",
+	"rbxassetid://14559264507",
+	"rbxassetid://14559350913",
 }
 local animation = Instance.new("Animation")
 local function playAnimationFromServer(animationID)
@@ -42,7 +42,7 @@ end
 function SwordLight(_, inputState)
 	if inputState == Enum.UserInputState.Begin and slashdebounce == false then
 		slashdebounce = true
-		if slashCount < 2 then
+		if slashCount < 5 then
 			slashCount = slashCount + 1
 			print("slash count" .. slashCount)
 			stopCount = stopCount + 1
@@ -52,7 +52,7 @@ function SwordLight(_, inputState)
 		Humanoid.WalkSpeed = 2
 		animationTrack.KeyframeReached:Wait()
 
-		if slashCount < 2 then
+		if slashCount < 5 then
 			slashdebounce = false
 		end
 
@@ -72,9 +72,9 @@ end
 
 function Sword:_equipped()
 	self.Instance.Equipped:Connect(function()
-		print("Sword Equipped")
-		print(self.Instance.Parent)
-		ContextActionService:BindAction("SwordL1", SwordLight, false, Enum.UserInputType.MouseButton1)
+		if Player.Name == self.Instance.Parent.Name then
+			ContextActionService:BindAction("SwordL1", SwordLight, false, Enum.UserInputType.MouseButton1)
+		end
 	end)
 end
 
