@@ -13,7 +13,7 @@ local VFXController = Knit.CreateController({
 	Name = "VFXController",
 })
 
-function dashVFX(player, root, direction, duration)
+function dashVFX(_, root, direction, duration)
 	local dashEffect1 = dashEffectT:Clone()
 	dashEffect1.CFrame = CFrame.new(root.position, root.position + direction)
 	dashEffect1.Parent = game.Workspace.VFX

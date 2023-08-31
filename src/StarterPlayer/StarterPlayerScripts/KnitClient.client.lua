@@ -16,7 +16,7 @@ end
 
 --require(StarterPlayerScripts.Client.Components.Sword)
 
-Knit.Start()
+Knit.Start({ ServicePromises = false })
 	:andThen(function()
 		print("Knit client started")
 	end)
