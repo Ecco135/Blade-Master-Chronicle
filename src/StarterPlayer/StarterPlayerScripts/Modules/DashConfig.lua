@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 local Camera = game.Workspace.CurrentCamera
 
 local Player = game.Players.LocalPlayer
@@ -7,6 +8,8 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local root = Character:WaitForChild("HumanoidRootPart")
 
 local TweenCamConfig = require(script.Parent.TweenCamConfig)
+local PhysicsConfig = require(script.Parent.PhysicsConfig)
+local CombatConfig = require(script.Parent.CombatConfig)
 
 local dashAni = ReplicatedStorage.VFX.MotionAni:WaitForChild("DashAnimation")
 local dashPlay = Humanoid:LoadAnimation(dashAni)
@@ -22,19 +25,6 @@ local _dashSpeed = 50
 DashConfig.dashCD = false
 
 local DashEvent = ReplicatedStorage.VFX.MotionEffect:WaitForChild("DashEvent")
-
-local attachment = Instance.new("Attachment")
-attachment.Name = "DashAttachment0"
-attachment.Parent = root
-
-local linearVelocity = Instance.new("LinearVelocity")
-linearVelocity.Attachment0 = attachment
-linearVelocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
-linearVelocity.PrimaryTangentAxis = Vector3.new(1, 0, 0)
-linearVelocity.SecondaryTangentAxis = Vector3.new(0, 0, 1)
-linearVelocity.MaxForce = math.huge
-linearVelocity.Enabled = false
-linearVelocity.Parent = root
 
 local function IsDashAllowed()
 	if DashConfig.dashCD then
@@ -62,6 +52,24 @@ local function GetDashVelocity()
 	return dashVelocity
 end
 
+local function collisioncheck(other, limb)
+	if
+		other.parent ~= Workspace.VFX
+		and (
+			limb == Character.UpperTorso
+			or limb == Character.Head
+			or limb == Character.LeftUpperArm
+			or limb == Character.RightUpperArm
+			or limb == root
+			or limb == Character.LowerTorso
+		)
+	then
+		CombatConfig.slashdebounce = false
+		PhysicsConfig.linearVelocity.Enabled = false
+		Humanoid.AutoRotate = true
+	end
+end
+
 function DashConfig.dash()
 	if IsDashAllowed() then
 		DashConfig.dashCD = true
@@ -69,20 +77,23 @@ function DashConfig.dash()
 
 		local dashVelocity = GetDashVelocity()
 
-		DashEvent:FireServer(root, Vector3.new(dashVelocity.X, 0, dashVelocity.Y) * 1000, _dashDuration)
-		--VFXService:dashVFX(root, Vector3.new(dashVelocity.X, 0, dashVelocity.Y) * 1000, dashDuration)
+		DashEvent:FireServer(root, _dashDuration)
 		Humanoid.AutoRotate = false
 		root.CFrame = CFrame.new(root.Position, Vector3.new(dashVelocity.X, 0, dashVelocity.Y) * 1000)
-
-		linearVelocity.PlaneVelocity = dashVelocity
-		linearVelocity.Enabled = true
+		PhysicsConfig.linearVelocity.PlaneVelocity = dashVelocity
+		PhysicsConfig.linearVelocity.Enabled = true
+		CombatConfig.slashCount = 0
+		CombatConfig.slashdebounce = true
 		dashPlay:Play()
 		dashPlay:AdjustSpeed(dashPlay.Length / _dashDuration)
 		dashSound:Play()
 		TweenCamConfig.TweenCamera(dashFOV)
 
+		local dashcheck = Humanoid.Touched:Connect(collisioncheck)
 		task.wait(_dashDuration)
-		linearVelocity.Enabled = false
+		CombatConfig.slashdebounce = false
+		PhysicsConfig.linearVelocity.Enabled = false
+		dashcheck:Disconnect()
 		Humanoid.AutoRotate = true
 	end
 end

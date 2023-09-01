@@ -6,27 +6,16 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
 local dashConfig = require(script.Parent.Parent.Modules.DashConfig)
+local PhysicsConfig = require(script.Parent.Parent.Modules.PhysicsConfig)
+local CombatConfig = require(script.Parent.Parent.Modules.CombatConfig)
 
 local Sword = Player.Backpack:WaitForChild("Sword")
 
-local slashCount = 0
-local slashdebounce = false
+--local slashCount = 0
+--local slashdebounce = false
 local animationTrack = nil
 local nextslashinput = false
 local animationstate = false
-
-local attachment = Instance.new("Attachment")
-attachment.Name = "SwordMovementAttachment0"
-attachment.Parent = HumanoidRootPart
-
-local linearVelocity = Instance.new("LinearVelocity")
-linearVelocity.Attachment0 = attachment
-linearVelocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
-linearVelocity.PrimaryTangentAxis = Vector3.new(1, 0, 0)
-linearVelocity.SecondaryTangentAxis = Vector3.new(0, 0, 1)
-linearVelocity.MaxForce = math.huge
-linearVelocity.Enabled = false
-linearVelocity.Parent = HumanoidRootPart
 
 local swordL = {}
 for _, v in pairs(ReplicatedStorage.VFX.MotionAni.SwordL:GetChildren()) do
@@ -39,10 +28,7 @@ local swordstep = { 0, 1.7, 1.7, 1.7, 0 }
 local function playAnimationFromServer(animationID)
 	local animator = Humanoid:FindFirstChildOfClass("Animator")
 	if animator then
-		for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-			track:Stop()
-		end
-		animationTrack = animator:LoadAnimation(animationID)
+		animationTrack = Humanoid:LoadAnimation(animationID)
 		animationTrack:Play()
 	end
 	return animationTrack
@@ -51,43 +37,43 @@ end
 function comboRefresh()
 	task.wait(0.6)
 	if tick() - nextslashinput > 0.6 then
-		slashCount = 0
+		CombatConfig.slashCount = 0
 		Humanoid.WalkSpeed = 16
-		slashdebounce = false
+		CombatConfig.slashdebounce = false
 	end
 end
 
 function SwordL(_, inputState)
-	if inputState == Enum.UserInputState.Begin and slashdebounce == false then
+	if inputState == Enum.UserInputState.Begin and CombatConfig.slashdebounce == false then
 		nextslashinput = tick()
-		slashdebounce = true
-		if slashCount < 5 then
+		CombatConfig.slashdebounce = true
+		if CombatConfig.slashCount < 5 then
 			if animationstate == true then
 				animationTrack.keyframeReached:Wait()
 				task.wait(0.05)
 			end
-			slashCount = slashCount + 1
+			CombatConfig.slashCount = CombatConfig.slashCount + 1
 		end
-		print("slash count: " .. slashCount)
+		print("slash count: " .. CombatConfig.slashCount)
 		Sword:FindFirstChild("Handle").Trail.Enabled = true
 
 		animationstate = true
-		animationTrack = playAnimationFromServer(swordL[slashCount])
+		animationTrack = playAnimationFromServer(swordL[CombatConfig.slashCount])
 
-		if slashCount == 4 then
+		if CombatConfig.slashCount == 4 then
 			Humanoid.JumpPower = 60
 			Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 		end
 
 		local direction = HumanoidRootPart.CFrame.LookVector
 		local planeDirection = Vector2.new(direction.X, direction.Z)
-		linearVelocity.PlaneVelocity = swordstep[slashCount] / swordslashT * planeDirection
+		PhysicsConfig.linearVelocity.PlaneVelocity = swordstep[CombatConfig.slashCount] / swordslashT * planeDirection
 		dashConfig.dashCD = true
 		Humanoid.AutoRotate = false
-		linearVelocity.Enabled = true
+		PhysicsConfig.linearVelocity.Enabled = true
 
-		if slashCount < 5 then
-			slashdebounce = false
+		if CombatConfig.slashCount < 5 then
+			CombatConfig.slashdebounce = false
 		end
 		Humanoid.WalkSpeed = 2
 		task.spawn(comboRefresh)
@@ -97,11 +83,13 @@ function SwordL(_, inputState)
 			Humanoid.JumpPower = 50
 		end
 
-		linearVelocity.Enabled = false
+		PhysicsConfig.linearVelocity.Enabled = false
+		animationTrack:Destroy()
 		HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position, HumanoidRootPart.Position + direction)
 		Humanoid.AutoRotate = true
-		Sword:FindFirstChild("Handle").Trail.Enabled = false
 		dashConfig.dashCD = false
+		Sword:FindFirstChild("Handle").Trail.Enabled = false
+
 		animationstate = false
 	end
 end

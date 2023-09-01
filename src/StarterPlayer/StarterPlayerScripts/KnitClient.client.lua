@@ -3,9 +3,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local StarterPlayerScripts = StarterPlayer.StarterPlayerScripts
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
-local Component = require(ReplicatedStorage.Packages.Component)
 
---Knit.AddController(ServerStorage.Money)
 Knit.AddControllers(script.Parent.Controller)
 
 for _, v in ipairs(StarterPlayerScripts.Client.Components:GetDescendants()) do
@@ -13,8 +11,6 @@ for _, v in ipairs(StarterPlayerScripts.Client.Components:GetDescendants()) do
 		require(v)
 	end
 end
-
---require(StarterPlayerScripts.Client.Components.Sword)
 
 Knit.Start({ ServicePromises = false })
 	:andThen(function()

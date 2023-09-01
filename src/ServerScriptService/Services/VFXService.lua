@@ -8,8 +8,8 @@ local VFXService = Knit.CreateService({
 	Client = {},
 })
 
-function dashVFX(player, root, direction, dashDuration)
-	DashEvent:FireAllClients(player, root, direction, dashDuration)
+function dashVFX(player, root, dashDuration)
+	DashEvent:FireAllClients(player, root, dashDuration)
 end
 
 function jumpVFX(player, root)
