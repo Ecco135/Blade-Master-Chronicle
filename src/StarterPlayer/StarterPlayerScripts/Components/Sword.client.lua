@@ -8,11 +8,13 @@ local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local dashConfig = require(script.Parent.Parent.Modules.DashConfig)
 local PhysicsConfig = require(script.Parent.Parent.Modules.PhysicsConfig)
 local CombatConfig = require(script.Parent.Parent.Modules.CombatConfig)
+local Knit = require(ReplicatedStorage.Packages.Knit)
+
+--Knit.Start({ ServicePromises = false }):catch(warn):await()
+local CombatDamageService = Knit.GetService("CombatDamageService")
 
 local Sword = Player.Backpack:WaitForChild("Sword")
 
---local slashCount = 0
---local slashdebounce = false
 local animationTrack = nil
 local nextslashinput = false
 local animationstate = false
@@ -59,6 +61,7 @@ function SwordL(_, inputState)
 
 		animationstate = true
 		animationTrack = playAnimationFromServer(swordL[CombatConfig.slashCount])
+		Sword.BladeBox.CanTouch = true
 
 		if CombatConfig.slashCount == 4 then
 			Humanoid.JumpPower = 60
@@ -82,7 +85,7 @@ function SwordL(_, inputState)
 		if Humanoid.JumpPower ~= 50 then
 			Humanoid.JumpPower = 50
 		end
-
+		Sword.BladeBox.CanTouch = false
 		PhysicsConfig.linearVelocity.Enabled = false
 		animationTrack:Destroy()
 		HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position, HumanoidRootPart.Position + direction)
@@ -94,8 +97,23 @@ function SwordL(_, inputState)
 	end
 end
 
+local function slashconnect(otherPart)
+	CombatDamageService:DamageCount(otherPart)
+	--[[
+	local Hum = otherPart.Parent:FindFirstChild("Humanoid")
+	if Hum then
+		if Hum.Parent == Player then
+			return
+		end
+		print("cut other stuff")
+	end
+	SwordcutEvent:FireServer(otherPart)
+	]]
+end
+
 Sword.Equipped:Connect(function()
 	ContextActionService:BindAction("SwordL", SwordL, false, Enum.UserInputType.MouseButton1)
+	Sword.BladeBox.Touched:Connect(slashconnect)
 end)
 
 Sword.Unequipped:Connect(function()

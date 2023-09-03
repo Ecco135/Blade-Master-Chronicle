@@ -12,7 +12,7 @@ for _, v in ipairs(ServerScriptService.Server:GetDescendants()) do
 end
 ]]
 
-Knit.Start()
+Knit.Start({ ServicePromises = false })
 	:andThen(function()
 		print("Knit server started")
 	end)

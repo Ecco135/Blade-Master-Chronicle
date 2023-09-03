@@ -18,7 +18,10 @@ local CharacterController = Knit.CreateController({
 	Name = "CharacterController",
 })
 
+function CharacterController:KnitInit() end
+
 function CharacterController:KnitStart()
+	print("CharacterController started")
 	local shiftKeyP = false
 	local WalkSpeed = 16
 	local RunSpeed = 25
@@ -79,6 +82,6 @@ function CharacterController:KnitStart()
 	Humanoid.StateChanged:Connect(airJumpState)
 end
 
-function CharacterController:KnitInit() end
+
 
 return CharacterController
