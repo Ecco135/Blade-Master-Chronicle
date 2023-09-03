@@ -10,7 +10,7 @@ local PhysicsConfig = require(script.Parent.Parent.Modules.PhysicsConfig)
 local CombatConfig = require(script.Parent.Parent.Modules.CombatConfig)
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
---Knit.Start({ ServicePromises = false }):catch(warn):await()
+Knit.Start({ ServicePromises = false }):catch(warn):await()
 local CombatDamageService = Knit.GetService("CombatDamageService")
 
 local Sword = Player.Backpack:WaitForChild("Sword")

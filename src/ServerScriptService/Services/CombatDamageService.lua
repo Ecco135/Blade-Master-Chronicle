@@ -2,6 +2,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SwordcutEvent = ReplicatedStorage.VFX.MotionEffect:WaitForChild("SwordcutEvent")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
+local DamageAni = ReplicatedStorage.VFX.MotionAni:WaitForChild("DamageAnimation")
+
 local CombatDamageService = Knit.CreateService({
 	Name = "CombatDamageService",
 	Client = {},
@@ -19,6 +21,9 @@ function CombatDamageService:DamageCount(Player, otherPart)
 		end
 		Hum.Parent:SetAttribute("JustCut", true)
 		SwordcutEvent:FireAllClients(Hum.Parent)
+		local damagePlay = Hum:LoadAnimation(DamageAni)
+		damagePlay.Priority = Enum.AnimationPriority.Action4
+		damagePlay:Play()
 		Hum:TakeDamage(10)
 		task.wait(0.3)
 		Hum.Parent:SetAttribute("JustCut", false)
