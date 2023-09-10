@@ -11,7 +11,7 @@ local TweenCamConfig = require(script.Parent.TweenCamConfig)
 local PhysicsConfig = require(script.Parent.PhysicsConfig)
 local CombatConfig = require(script.Parent.CombatConfig)
 
-local dashAni = ReplicatedStorage.VFX.MotionAni:WaitForChild("DashAnimation")
+local dashAni = Character.MotionAni:WaitForChild("DashAnimation")
 local dashPlay = Humanoid:LoadAnimation(dashAni)
 dashPlay.Priority = Enum.AnimationPriority.Action3
 local dashSound = ReplicatedStorage.VFX.MotionSound:WaitForChild("Dash")
@@ -24,7 +24,7 @@ local _dashDuration = 0.3
 local _dashSpeed = 50
 DashConfig.dashCD = false
 
-local DashEvent = ReplicatedStorage.VFX.MotionEffect:WaitForChild("DashEvent")
+local DashEvent = ReplicatedStorage.Event:WaitForChild("DashEvent")
 
 local function IsDashAllowed()
 	if DashConfig.dashCD then

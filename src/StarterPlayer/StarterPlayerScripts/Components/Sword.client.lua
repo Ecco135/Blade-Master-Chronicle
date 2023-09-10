@@ -8,10 +8,8 @@ local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 local dashConfig = require(script.Parent.Parent.Modules.DashConfig)
 local PhysicsConfig = require(script.Parent.Parent.Modules.PhysicsConfig)
 local CombatConfig = require(script.Parent.Parent.Modules.CombatConfig)
-local Knit = require(ReplicatedStorage.Packages.Knit)
 
-Knit.Start({ ServicePromises = false }):catch(warn):await()
-local CombatDamageService = Knit.GetService("CombatDamageService")
+local SwordcutEvent = ReplicatedStorage.Event:WaitForChild("SwordcutEvent")
 
 local Sword = Player.Backpack:WaitForChild("Sword")
 
@@ -20,7 +18,7 @@ local nextslashinput = false
 local animationstate = false
 
 local swordL = {}
-for _, v in pairs(ReplicatedStorage.VFX.MotionAni.SwordL:GetChildren()) do
+for _, v in pairs(Character.MotionAni.SwordL:GetChildren()) do
 	swordL[tonumber(v.name:sub(-1))] = v
 end
 
@@ -56,7 +54,6 @@ function SwordL(_, inputState)
 			end
 			CombatConfig.slashCount = CombatConfig.slashCount + 1
 		end
-		print("slash count: " .. CombatConfig.slashCount)
 		Sword:FindFirstChild("Handle").Trail.Enabled = true
 
 		animationstate = true
@@ -98,17 +95,7 @@ function SwordL(_, inputState)
 end
 
 local function slashconnect(otherPart)
-	CombatDamageService:DamageCount(otherPart)
-	--[[
-	local Hum = otherPart.Parent:FindFirstChild("Humanoid")
-	if Hum then
-		if Hum.Parent == Player then
-			return
-		end
-		print("cut other stuff")
-	end
 	SwordcutEvent:FireServer(otherPart)
-	]]
 end
 
 Sword.Equipped:Connect(function()

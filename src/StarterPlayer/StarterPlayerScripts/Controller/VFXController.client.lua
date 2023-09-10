@@ -1,17 +1,11 @@
---local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Knit = require(ReplicatedStorage.Packages.Knit)
-local DashEvent = ReplicatedStorage.VFX.MotionEffect:WaitForChild("DashEvent")
-local JumpEvent = ReplicatedStorage.VFX.MotionEffect:WaitForChild("JumpEvent")
-local SwordcutEvent = ReplicatedStorage.VFX.MotionEffect:WaitForChild("SwordcutEvent")
+local DashEvent = ReplicatedStorage.Event:WaitForChild("DashEvent")
+local JumpEvent = ReplicatedStorage.Event:WaitForChild("JumpEvent")
+local SwordcutEvent = ReplicatedStorage.Event:WaitForChild("SwordcutEvent")
 local jumpEffectT = ReplicatedStorage.VFX.MotionEffect:WaitForChild("JumpEffect")
 local debris = game:GetService("Debris")
 local ts = game:GetService("TweenService")
 local jumpSound = jumpEffectT:WaitForChild("AirJump")
-
-local VFXController = Knit.CreateController({
-	Name = "VFXController",
-})
 
 function dashVFX(_, root, duration)
 	root.Parent.Head.face.Transparency = 1
@@ -81,12 +75,6 @@ function DamageVFX(Player)
 	end
 end
 
-function VFXController:KnitStart()
-	DashEvent.OnClientEvent:Connect(dashVFX)
-	JumpEvent.OnClientEvent:Connect(jumpVFX)
-	SwordcutEvent.OnClientEvent:Connect(DamageVFX)
-end
-
-function VFXController:KnitInit() end
-
-return VFXController
+DashEvent.OnClientEvent:Connect(dashVFX)
+JumpEvent.OnClientEvent:Connect(jumpVFX)
+SwordcutEvent.OnClientEvent:Connect(DamageVFX)

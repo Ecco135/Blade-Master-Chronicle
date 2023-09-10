@@ -1,24 +1,18 @@
 local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local root = Character:WaitForChild("HumanoidRootPart")
-local airJumpAni = ReplicatedStorage.VFX.MotionAni:WaitForChild("AirJumpAnimation")
+local airJumpAni = Character.MotionAni:WaitForChild("AirJumpAnimation")
 local airJumpPlay = Humanoid:LoadAnimation(airJumpAni)
 
 local dashConfig = require(script.Parent.Parent.Modules.DashConfig)
 local TweenCamConfig = require(script.Parent.Parent.Modules.TweenCamConfig)
 
-local JumpEvent = ReplicatedStorage.VFX.MotionEffect:WaitForChild("JumpEvent")
+local JumpEvent = ReplicatedStorage.Event:WaitForChild("JumpEvent")
 
-local CharacterController = Knit.CreateController({
-	Name = "CharacterController",
-})
-
-print("CharacterController started")
 local shiftKeyP = false
 local WalkSpeed = 16
 local RunSpeed = 25
@@ -26,6 +20,7 @@ local DashRunKey = Enum.KeyCode.LeftShift
 local walkFOV = 70
 local runFOV = 80
 local doubleJumpCount = 0
+
 local function DashRun(_, inputState)
 	if inputState == Enum.UserInputState.Begin then
 		if shiftKeyP == false then
@@ -69,8 +64,3 @@ local function airJumpState(_oldState, newState)
 end
 ContextActionService:BindAction("DashRun", DashRun, false, DashRunKey)
 Humanoid.StateChanged:Connect(airJumpState)
-
-function CharacterController:KnitInit() end
-function CharacterController:KnitStart() end
-
-return CharacterController
