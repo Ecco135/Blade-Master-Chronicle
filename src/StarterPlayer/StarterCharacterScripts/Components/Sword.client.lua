@@ -5,8 +5,8 @@ local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-local dashConfig = require(script.Parent.Parent.Modules.DashConfig)
-local PhysicsConfig = require(script.Parent.Parent.Modules.PhysicsConfig)
+local dashConfig = require(script.Parent.Parent:WaitForChild("Modules").DashConfig)
+--local PhysicsConfig = require(script.Parent.Parent.Modules.PhysicsConfig)
 local CombatConfig = require(script.Parent.Parent.Modules.CombatConfig)
 
 local SwordcutEvent = ReplicatedStorage.Event:WaitForChild("SwordcutEvent")
@@ -29,6 +29,7 @@ local function playAnimationFromServer(animationID)
 	local animator = Humanoid:FindFirstChildOfClass("Animator")
 	if animator then
 		animationTrack = Humanoid:LoadAnimation(animationID)
+		animationTrack.Priority = Enum.AnimationPriority.Action2
 		animationTrack:Play()
 	end
 	return animationTrack
@@ -67,10 +68,12 @@ function SwordL(_, inputState)
 
 		local direction = HumanoidRootPart.CFrame.LookVector
 		local planeDirection = Vector2.new(direction.X, direction.Z)
-		PhysicsConfig.linearVelocity.PlaneVelocity = swordstep[CombatConfig.slashCount] / swordslashT * planeDirection
+		HumanoidRootPart.LinearVelocity.PlaneVelocity = swordstep[CombatConfig.slashCount]
+			/ swordslashT
+			* planeDirection
 		dashConfig.dashCD = true
 		Humanoid.AutoRotate = false
-		PhysicsConfig.linearVelocity.Enabled = true
+		HumanoidRootPart.LinearVelocity.Enabled = true
 
 		if CombatConfig.slashCount < 5 then
 			CombatConfig.slashdebounce = false
@@ -83,7 +86,7 @@ function SwordL(_, inputState)
 			Humanoid.JumpPower = 50
 		end
 		Sword.BladeBox.CanTouch = false
-		PhysicsConfig.linearVelocity.Enabled = false
+		HumanoidRootPart.LinearVelocity.Enabled = false
 		animationTrack:Destroy()
 		HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position, HumanoidRootPart.Position + direction)
 		Humanoid.AutoRotate = true

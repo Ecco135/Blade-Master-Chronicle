@@ -57,8 +57,8 @@ function jumpVFX(_, root)
 end
 
 function DamageVFX(Player)
-	print("damage vfx created")
-	print(Player)
+	--print("damage vfx created")
+	--print(Player)
 	for _, part in pairs(Player:GetChildren()) do
 		if part:IsA("BasePart") then
 			local clone = part:Clone()

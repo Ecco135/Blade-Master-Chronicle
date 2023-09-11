@@ -1,5 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SwordcutEvent = ReplicatedStorage.Event:WaitForChild("SwordcutEvent")
+
+local CombatDamage = require(script.Parent.Parent.Modules.CombatDamage)
 --local Knit = require(ReplicatedStorage.Packages.Knit)
 
 --local DamageAni = ReplicatedStorage.VFX.MotionAni:WaitForChild("DamageAnimation")
@@ -11,8 +13,9 @@ local CombatDamageService = Knit.CreateService({
 })
 
 ]]
-
-function DamageCount(Player, otherPart)
+--[[
+local CombatDamageService = {}
+function CombatDamageService.DamageCount(Player, otherPart)
 	local Hum = nil
 	if otherPart then
 		Hum = otherPart.Parent:FindFirstChild("Humanoid")
@@ -29,10 +32,11 @@ function DamageCount(Player, otherPart)
 		damagePlay.Priority = Enum.AnimationPriority.Action4
 		damagePlay:Play()
 		Hum:TakeDamage(10)
-		task.wait(0.3)
+		task.wait(0.2)
 		Hum.Parent:SetAttribute("JustCut", false)
 	end
 end
+]]
 
 --[[
 function CombatDamageService.Client:DamageCount(Player, otherPart)
@@ -46,5 +50,4 @@ function CombatDamageService:KnitStart()
 end
 ]]
 
-SwordcutEvent.OnServerEvent:Connect(DamageCount)
---return CombatDamageService
+SwordcutEvent.OnServerEvent:Connect(CombatDamage.DamageCount)

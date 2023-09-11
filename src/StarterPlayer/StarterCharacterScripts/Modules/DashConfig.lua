@@ -8,7 +8,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local root = Character:WaitForChild("HumanoidRootPart")
 
 local TweenCamConfig = require(script.Parent.TweenCamConfig)
-local PhysicsConfig = require(script.Parent.PhysicsConfig)
+--local PhysicsConfig = require(script.Parent.PhysicsConfig)
 local CombatConfig = require(script.Parent.CombatConfig)
 
 local dashAni = Character.MotionAni:WaitForChild("DashAnimation")
@@ -65,7 +65,7 @@ local function collisioncheck(other, limb)
 		)
 	then
 		CombatConfig.slashdebounce = false
-		PhysicsConfig.linearVelocity.Enabled = false
+		root.LinearVelocity.Enabled = false
 		Humanoid.AutoRotate = true
 	end
 end
@@ -80,8 +80,8 @@ function DashConfig.dash()
 		DashEvent:FireServer(root, _dashDuration)
 		Humanoid.AutoRotate = false
 		root.CFrame = CFrame.new(root.Position, Vector3.new(dashVelocity.X, 0, dashVelocity.Y) * 1000)
-		PhysicsConfig.linearVelocity.PlaneVelocity = dashVelocity
-		PhysicsConfig.linearVelocity.Enabled = true
+		root.LinearVelocity.PlaneVelocity = dashVelocity
+		root.LinearVelocity.Enabled = true
 		CombatConfig.slashCount = 0
 		CombatConfig.slashdebounce = true
 		dashPlay:Play()
@@ -92,7 +92,7 @@ function DashConfig.dash()
 		local dashcheck = Humanoid.Touched:Connect(collisioncheck)
 		task.wait(_dashDuration)
 		CombatConfig.slashdebounce = false
-		PhysicsConfig.linearVelocity.Enabled = false
+		root.LinearVelocity.Enabled = false
 		dashcheck:Disconnect()
 		Humanoid.AutoRotate = true
 	end

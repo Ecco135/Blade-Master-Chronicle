@@ -5,7 +5,7 @@ local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local root = Character:WaitForChild("HumanoidRootPart")
-local airJumpAni = Character.MotionAni:WaitForChild("AirJumpAnimation")
+local airJumpAni = Character:WaitForChild("MotionAni").AirJumpAnimation
 local airJumpPlay = Humanoid:LoadAnimation(airJumpAni)
 
 local dashConfig = require(script.Parent.Parent.Modules.DashConfig)
