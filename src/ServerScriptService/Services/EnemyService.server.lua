@@ -19,10 +19,13 @@ function getPlayerHeadings(NPCroot)
 
 	for _, player in pairs(playerList) do
 		local character = player.Character
-		if character then
+		local HumanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+		if HumanoidRootPart then
+			--if character.HumanoidRootPart ~= nil then
 			local distanceVector = (character.HumanoidRootPart.Position - NPCroot.Position)
 			distance = distanceVector.Magnitude
 			direction = distanceVector.Unit
+			--end
 		end
 	end
 
@@ -31,6 +34,9 @@ end
 
 RunService.Heartbeat:Connect(function()
 	for _, NPC in CollectionService:GetTagged("Enemy") do
+		if NPC.Parent ~= workspace then
+			return
+		end
 		if NPC.Humanoid.Health == 0 then
 			task.wait(2)
 			NPC:Destroy()

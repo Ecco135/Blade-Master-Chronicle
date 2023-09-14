@@ -20,9 +20,15 @@ local function onCharacterAdded(character)
 	LinearVelocity.MaxForce = math.huge
 	LinearVelocity.Enabled = false
 	LinearVelocity.Parent = HumanoidRootPart
+
+	character.ChildRemoved:Connect(function(part)
+		if part.Name == "HumanoidRootPart" then
+			print("player fall off")
+			character.Humanoid.Health = 0
+		end
+	end)
 end
 
 Players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(onCharacterAdded)
-	print("player added")
 end)
