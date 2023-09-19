@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+local PlayerDiedEvent = ReplicatedStorage.Event.PlayerDiedEvent
 
 --local PhysicsConfig = require(ReplicatedStorage.Shared.Modules.PhysicsConfig)
 
@@ -26,6 +27,10 @@ local function onCharacterAdded(character)
 			print("player fall off")
 			character.Humanoid.Health = 0
 		end
+	end)
+
+	character.Humanoid.Died:Connect(function()
+		PlayerDiedEvent:Fire(character.Name)
 	end)
 end
 

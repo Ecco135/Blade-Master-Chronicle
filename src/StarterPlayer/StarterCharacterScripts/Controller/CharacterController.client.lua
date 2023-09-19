@@ -1,5 +1,6 @@
 local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
 
 local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -10,8 +11,12 @@ local airJumpPlay = Humanoid:LoadAnimation(airJumpAni)
 
 local dashConfig = require(script.Parent.Parent.Modules.DashConfig)
 local TweenCamConfig = require(script.Parent.Parent.Modules.TweenCamConfig)
+local CombatConfig = require(script.Parent.Parent.Modules.CombatConfig)
 
 local JumpEvent = ReplicatedStorage.Event:WaitForChild("JumpEvent")
+local QuestEvent = ReplicatedStorage.Event.QuestEvent
+
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
 
 local shiftKeyP = false
 local WalkSpeed = 16
@@ -62,5 +67,17 @@ local function airJumpState(_oldState, newState)
 		doubleJumpCount = 0
 	end
 end
+
+local function QuestStartupSequence()
+	--local playerControl = require(Player.PlayerScripts.PlayerModule):GetControls()
+	--playerControl:Disable()
+
+	for i = 1, 5, 1 do
+		local animationTrack = CombatConfig.playAnimationFromServer(CombatConfig.swordL[i])
+		animationTrack.KeyframeReached:Wait()
+	end
+	--playerControl:Enable(true)
+end
 ContextActionService:BindAction("DashRun", DashRun, false, DashRunKey)
 Humanoid.StateChanged:Connect(airJumpState)
+QuestEvent.OnClientEvent:Connect(QuestStartupSequence)

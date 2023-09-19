@@ -18,7 +18,7 @@ function CombatDamage.DamageCount(Player, otherPart)
 		local damagePlay = Hum:LoadAnimation(DamageAni)
 		damagePlay.Priority = Enum.AnimationPriority.Action4
 		damagePlay:Play()
-		Hum:TakeDamage(10)
+		Hum:TakeDamage(50)
 		task.wait(0.2)
 		if Hum.Parent then
 			Hum.Parent:SetAttribute("JustCut", false)

@@ -11,11 +11,13 @@ local CombatConfig = require(script.Parent.Parent.Modules.CombatConfig)
 
 local SwordcutEvent = ReplicatedStorage.Event:WaitForChild("SwordcutEvent")
 
-local Sword = Player.Backpack:WaitForChild("Sword")
+--local Sword = Player.Backpack:WaitForChild("Sword")
 
 local animationTrack = nil
 local nextslashinput = false
 local animationstate = false
+
+local Sword = nil
 
 local swordL = {}
 for _, v in pairs(Character.MotionAni.SwordL:GetChildren()) do
@@ -101,7 +103,24 @@ local function slashconnect(otherPart)
 	SwordcutEvent:FireServer(otherPart)
 end
 
+Character.ChildAdded:Connect(function(child)
+	if child.Name == "Sword" then
+		print("sword combat binded")
+		Sword = child
+		ContextActionService:BindAction("SwordL", SwordL, false, Enum.UserInputType.MouseButton1)
+		Sword:WaitForChild("BladeBox").Touched:Connect(slashconnect)
+	end
+end)
+
+Character.ChildRemoved:Connect(function(child)
+	if child.Name == "Sword" then
+		ContextActionService:UnbindAction("SwordL")
+	end
+end)
+
+--[[
 Sword.Equipped:Connect(function()
+	print("sword equipped")
 	ContextActionService:BindAction("SwordL", SwordL, false, Enum.UserInputType.MouseButton1)
 	Sword.BladeBox.Touched:Connect(slashconnect)
 end)
@@ -109,3 +128,4 @@ end)
 Sword.Unequipped:Connect(function()
 	ContextActionService:UnbindAction("SwordL")
 end)
+]]

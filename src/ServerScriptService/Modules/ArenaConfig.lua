@@ -11,4 +11,17 @@ for i = 1, 50, 1 do
 	ArenaConfig.ArenaPos[i] = CFrame.new(positionX, positionY, positionZ)
 end
 
+ArenaConfig.ArenaInfo = {}
+for i = 1, 50, 1 do
+	ArenaConfig.ArenaInfo[i] = {}
+	ArenaConfig.ArenaInfo[i].occupied = false
+end
+
+-- player - waves
+
 return ArenaConfig
+
+--need to capture arena numbering
+--need to capture arena spawn area
+--need to capture player bind to arena
+--track which arena number is taken

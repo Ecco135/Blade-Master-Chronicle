@@ -4,58 +4,87 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
+local WaveInitEvent = ReplicatedStorage.Event.WaveInitEvent
+local WaveClearEvent = ReplicatedStorage.Event.WaveClearEvent
+local msgPrompEvent = ReplicatedStorage.Event.MSGPromp
+
 local slashAni = ReplicatedStorage.VFX.MotionAni.SwordL.SwordL1
 
 local CombatDamage = require(ServerScriptService.Server.Modules.CombatDamage)
+local ArenaConfig = require(ServerScriptService.Server.Modules.ArenaConfig)
 
-local chaseDistance = 40
+local chaseDistance = 100
 local stopDistance = 5
+local enemyMax = 50
+local connection = {}
 
-function getPlayerHeadings(NPCroot)
-	local playerList = Players:GetPlayers()
-
+function getPlayerHeadings(NPCroot, player)
 	local distance = nil
 	local direction = nil
-
-	for _, player in pairs(playerList) do
-		local character = player.Character
-		local HumanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-		if HumanoidRootPart then
-			--if character.HumanoidRootPart ~= nil then
-			local distanceVector = (character.HumanoidRootPart.Position - NPCroot.Position)
-			distance = distanceVector.Magnitude
-			direction = distanceVector.Unit
-			--end
-		end
-	end
+	local character = player.Character
+	local distanceVector = (character.HumanoidRootPart.Position - NPCroot.Position)
+	distance = distanceVector.Magnitude
+	direction = distanceVector.Unit
 
 	return distance, direction
 end
 
-RunService.Heartbeat:Connect(function()
-	for _, NPC in CollectionService:GetTagged("Enemy") do
-		if NPC.Parent ~= workspace then
-			return
-		end
-		if NPC.Humanoid.Health == 0 then
-			task.wait(2)
-			NPC:Destroy()
-			return
-		end
-		local sword = NPC.Sword
-		local NPCroot = NPC.PrimaryPart
-		local NPCHumanoid = NPC.Humanoid
-		local distance, direction = getPlayerHeadings(NPCroot)
-		if distance then
-			if distance <= chaseDistance and distance >= stopDistance and NPC:GetAttribute("Attacking") == false then
-				NPCHumanoid:Move(direction)
-			else
-				NPCHumanoid:Move(Vector3.new())
+WaveInitEvent.Event:Connect(function(player)
+	for i, arena in pairs(ArenaConfig.ArenaInfo) do
+		if arena.player == player then
+			local txtMSG = "Wave " .. arena.wave .. " is coming"
+			msgPrompEvent:FireClient(player, txtMSG, 2)
+			local enemyCount = 10 * (1.2 ^ (arena.wave - 1))
+			for j = 1, enemyCount, 1 do
+				while arena.wavegen == false do
+					task.wait(3)
+					if arena.eCount < 50 then
+						arena.wavegen = true
+					end
+				end
+
+				local enemy = ReplicatedStorage.Enemy.Goblin:Clone()
+				local enemyPos =
+					Vector3.new(math.random(arena.sMinX, arena.sMaxX), arena.sY, math.random(arena.sMinZ, arena.sMaxZ))
+				local enemyFace = arena.player.Character.HumanoidRootPart.Position
+				enemy.HumanoidRootPart.CFrame = CFrame.new(enemyPos, enemyFace)
+				enemy:SetAttribute("ArenaNo", 1)
+				enemy.Parent = arena.arena:WaitForChild("Enemy") --game.Workspace.Enemy
+				arena.eCount += 1
+				task.wait(1)
+				if arena.eCount == 50 then
+					arena.wavegen = false
+				end
 			end
-			if distance < stopDistance and NPC:GetAttribute("Attacking") == false then
-				NPC:SetAttribute("Attacking", true)
+		end
+	end
+end)
+
+local function onEnemyAdded(enemy)
+	local enemyHum = enemy:WaitForChild("Humanoid")
+	local sword = enemy:WaitForChild("Sword")
+	connection[enemy] = sword.BladeBox.Touched:Connect(function(otherPart)
+		CombatDamage.DamageCount(enemy, otherPart)
+	end)
+	enemyHum.Died:Connect(function()
+		task.wait(2)
+		enemy:Destroy()
+	end)
+
+	while enemyHum.Health > 0 do
+		local arenaNo = enemy:GetAttribute("ArenaNo")
+		local Enemyroot = enemy.PrimaryPart
+		local distance, direction = getPlayerHeadings(Enemyroot, ArenaConfig.ArenaInfo[arenaNo].player)
+		if distance then
+			if distance <= chaseDistance and distance >= stopDistance and enemy:GetAttribute("Attacking") == false then
+				enemyHum:Move(direction)
+			else
+				enemyHum:Move(Vector3.new())
+			end
+			if distance < stopDistance and enemy:GetAttribute("Attacking") == false then
+				enemy:SetAttribute("Attacking", true)
 				task.wait(0.5)
-				local attackPlay = NPCHumanoid:LoadAnimation(slashAni)
+				local attackPlay = enemyHum:LoadAnimation(slashAni)
 				attackPlay.Priority = Enum.AnimationPriority.Action2
 				attackPlay:AdjustSpeed(attackPlay.Length / 15)
 				attackPlay:Play()
@@ -64,15 +93,26 @@ RunService.Heartbeat:Connect(function()
 				attackPlay.keyframeReached:Wait()
 				sword.BladeBox.CanTouch = false
 				task.wait(1)
-				NPC:SetAttribute("Attacking", false)
+				enemy:SetAttribute("Attacking", false)
 			end
 		end
+		task.wait(0.5)
 	end
-end)
-
-for _, NPC in CollectionService:GetTagged("Enemy") do
-	local sword = NPC.Sword
-	sword.BladeBox.Touched:Connect(function(otherPart)
-		CombatDamage.DamageCount(NPC, otherPart)
-	end)
 end
+
+local function onEnemyRemoved(enemy)
+	local arenaNo = enemy:GetAttribute("ArenaNo")
+	connection[enemy]:Disconnect()
+	local arena = ArenaConfig.ArenaInfo[arenaNo]
+	arena.eCount -= 1
+	task.wait(3)
+	print(arena.eCount)
+	print(arena.waveclear)
+	if arena.eCount == 0 and arena.waveclear == false then
+		arena.waveclear = true
+		WaveClearEvent:Fire(arena.player)
+	end
+end
+
+CollectionService:GetInstanceAddedSignal("Enemy"):Connect(onEnemyAdded)
+CollectionService:GetInstanceRemovedSignal("Enemy"):Connect(onEnemyRemoved)
