@@ -71,11 +71,13 @@ end
 local function QuestStartupSequence()
 	--local playerControl = require(Player.PlayerScripts.PlayerModule):GetControls()
 	--playerControl:Disable()
-
+	Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+	task.wait(0.5)
 	for i = 1, 5, 1 do
 		local animationTrack = CombatConfig.playAnimationFromServer(CombatConfig.swordL[i])
 		animationTrack.KeyframeReached:Wait()
 	end
+
 	--playerControl:Enable(true)
 end
 ContextActionService:BindAction("DashRun", DashRun, false, DashRunKey)

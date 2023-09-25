@@ -3,7 +3,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local PlayerDiedEvent = ReplicatedStorage.Event.PlayerDiedEvent
 
+local FirstSpawn = Workspace.Lobby.Spawns:WaitForChild("FirstSpawn")
+
 --local PhysicsConfig = require(ReplicatedStorage.Shared.Modules.PhysicsConfig)
+Players.CharacterAutoLoads = false
 
 local function onCharacterAdded(character)
 	local HumanoidRootPart = character.HumanoidRootPart
@@ -29,11 +32,26 @@ local function onCharacterAdded(character)
 		end
 	end)
 
+	--[[
+	character.Humanoid.HealthChanged:Connect(function()
+		print("damaged")
+		if character.Humanoid.Health <= 0 then
+			PlayerDiedEvent:Fire(character.Name)
+		end
+	end)
+	
+	Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+	Humanoid.BreakJointsOnDeath = false
+
+	]]
+
 	character.Humanoid.Died:Connect(function()
 		PlayerDiedEvent:Fire(character.Name)
 	end)
 end
 
 Players.PlayerAdded:Connect(function(player)
+	player.RespawnLocation = FirstSpawn
 	player.CharacterAdded:Connect(onCharacterAdded)
+	player:LoadCharacter()
 end)

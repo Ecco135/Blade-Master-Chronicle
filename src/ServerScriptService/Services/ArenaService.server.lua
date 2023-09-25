@@ -6,8 +6,23 @@ local WaveInitEvent = ReplicatedStorage.Event.WaveInitEvent
 local WaveClearEvent = ReplicatedStorage.Event.WaveClearEvent
 local msgPrompEvent = ReplicatedStorage.Event.MSGPromp
 local PlayerDiedEvent = ReplicatedStorage.Event.PlayerDiedEvent
+local ContinueEvent = ReplicatedStorage.Event.ContinueEvent
+local EndQuestEvent = ReplicatedStorage.Event.EndQuestEvent
 
 local ArenaConfig = require(ServerScriptServices.Server.Modules.ArenaConfig)
+
+local function continue(player)
+	for i, arena in pairs(ArenaConfig.ArenaInfo) do
+		if arena.player == player then
+			arena.alive = true
+			break
+		end
+	end
+	player:LoadCharacter()
+	task.wait(0.1)
+	local Sword = ReplicatedStorage.Weapon.Sword:Clone()
+	Sword.Parent = player.Character
+end
 
 local function prepArena(player)
 	local QuestArena = ReplicatedStorage.Arena.QuestArena:Clone()
@@ -59,12 +74,25 @@ local function prepArena(player)
 		end
 	end
 	player.Character.HumanoidRootPart.CFrame = QuestArena.PlayerPortal.CFrame
+	player.RespawnLocation = QuestArena.SpawnLocation
 	local Sword = ReplicatedStorage.Weapon.Sword:Clone()
 	Sword.Parent = player.Character
 	QuestEvent:FireClient(player)
 	msgPrompEvent:FireClient(player, "Warming Up", 2)
 	task.wait(3)
 	WaveInitEvent:Fire(player)
+end
+
+local function clearArena(player)
+	for i, arena in pairs(ArenaConfig.ArenaInfo) do
+		if arena.player.Name == playerName then
+			arena.arena:Destroy()
+			task.wait(1)
+			ArenaConfig.ArenaInfo[i] = {}
+			ArenaConfig.ArenaInfo[i].occupied = false
+			break
+		end
+	end
 end
 
 WaveClearEvent.Event:Connect(function(player)
@@ -79,16 +107,35 @@ WaveClearEvent.Event:Connect(function(player)
 	end
 end)
 
-QuestEvent.onServerEvent:Connect(function(player)
-	prepArena(player)
-end)
+QuestEvent.onServerEvent:Connect(prepArena)
 
 PlayerDiedEvent.Event:Connect(function(playerName)
 	for i, arena in pairs(ArenaConfig.ArenaInfo) do
 		if arena.player.Name == playerName then
 			print("Player " .. playerName .. " has died")
 			arena.alive = false
+			arena.player.PlayerGui.ContinueUI.Enabled = true
+			arena.player.Character.Sword:Destroy()
+
+			--[[
 			task.wait(7)
+			arena.arena:Destroy()
+			task.wait(1)
+			ArenaConfig.ArenaInfo[i] = {}
+			ArenaConfig.ArenaInfo[i].occupied = false
+			]]
+			break
+		end
+	end
+end)
+
+EndQuestEvent.onServerEvent:Connect(function(player)
+	for i, arena in pairs(ArenaConfig.ArenaInfo) do
+		if arena.player == player then
+			print("Player " .. tostring(player) .. " end quest")
+			player.RespawnLocation = game.Workspace.Lobby.Spawns.FirstSpawn
+			player:LoadCharacter()
+			task.wait(1)
 			arena.arena:Destroy()
 			task.wait(1)
 			ArenaConfig.ArenaInfo[i] = {}
@@ -97,3 +144,5 @@ PlayerDiedEvent.Event:Connect(function(playerName)
 		end
 	end
 end)
+
+ContinueEvent.onServerEvent:Connect(continue)
