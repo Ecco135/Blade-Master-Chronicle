@@ -3,6 +3,12 @@ local SwordcutEvent = ReplicatedStorage.Event:WaitForChild("SwordcutEvent")
 local CombatDamage = {}
 
 function CombatDamage.DamageCount(Player, otherPart)
+	if Player:GetAttribute("Enemy") then
+		if otherPart.Parent:GetAttribute("Enemy") then
+			return
+		end
+	end
+
 	local Hum = nil
 	if otherPart then
 		Hum = otherPart.Parent:FindFirstChild("Humanoid")

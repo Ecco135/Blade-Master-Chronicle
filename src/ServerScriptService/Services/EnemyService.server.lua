@@ -74,26 +74,32 @@ local function onEnemyAdded(enemy)
 	while enemyHum.Health > 0 do
 		local arenaNo = enemy:GetAttribute("ArenaNo")
 		local Enemyroot = enemy.PrimaryPart
-		local distance, direction = getPlayerHeadings(Enemyroot, ArenaConfig.ArenaInfo[arenaNo].player)
-		if distance then
-			if distance <= chaseDistance and distance >= stopDistance and enemy:GetAttribute("Attacking") == false then
-				enemyHum:Move(direction)
-			else
-				enemyHum:Move(Vector3.new())
-			end
-			if distance < stopDistance and enemy:GetAttribute("Attacking") == false then
-				enemy:SetAttribute("Attacking", true)
-				task.wait(0.5)
-				local attackPlay = enemyHum:LoadAnimation(slashAni)
-				attackPlay.Priority = Enum.AnimationPriority.Action2
-				attackPlay:AdjustSpeed(attackPlay.Length / 15)
-				attackPlay:Play()
-				sword.BladeBox.CanTouch = true
+		if ArenaConfig.ArenaInfo[arenaNo].alive then
+			local distance, direction = getPlayerHeadings(Enemyroot, ArenaConfig.ArenaInfo[arenaNo].player)
+			if distance then
+				if
+					distance <= chaseDistance
+					and distance >= stopDistance
+					and enemy:GetAttribute("Attacking") == false
+				then
+					enemyHum:Move(direction)
+				else
+					enemyHum:Move(Vector3.new())
+				end
+				if distance < stopDistance and enemy:GetAttribute("Attacking") == false then
+					enemy:SetAttribute("Attacking", true)
+					task.wait(0.5)
+					local attackPlay = enemyHum:LoadAnimation(slashAni)
+					attackPlay.Priority = Enum.AnimationPriority.Action2
+					attackPlay:AdjustSpeed(attackPlay.Length / 15)
+					attackPlay:Play()
+					sword.BladeBox.CanTouch = true
 
-				attackPlay.keyframeReached:Wait()
-				sword.BladeBox.CanTouch = false
-				task.wait(1)
-				enemy:SetAttribute("Attacking", false)
+					attackPlay.keyframeReached:Wait()
+					sword.BladeBox.CanTouch = false
+					task.wait(1)
+					enemy:SetAttribute("Attacking", false)
+				end
 			end
 		end
 		task.wait(0.5)
