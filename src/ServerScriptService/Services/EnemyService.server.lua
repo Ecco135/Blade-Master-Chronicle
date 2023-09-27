@@ -61,6 +61,7 @@ WaveInitEvent.Event:Connect(function(player)
 end)
 
 local function onEnemyAdded(enemy)
+	enemy:SetAttribute("")
 	local enemyHum = enemy:WaitForChild("Humanoid")
 	local sword = enemy:WaitForChild("Sword")
 	connection[enemy] = sword.BladeBox.Touched:Connect(function(otherPart)
@@ -70,6 +71,12 @@ local function onEnemyAdded(enemy)
 		task.wait(2)
 		enemy:Destroy()
 	end)
+
+	local idleAnimation = sword.Animation.Idle
+	local idlePlay = enemyHum:LoadAnimation(idleAnimation)
+	local runAnimation = sword.Animation.Run
+	local runPlay = enemyHum:LoadAnimation(runAnimation)
+	idlePlay:Play()
 
 	while enemyHum.Health > 0 do
 		local arenaNo = enemy:GetAttribute("ArenaNo")
@@ -82,9 +89,18 @@ local function onEnemyAdded(enemy)
 					and distance >= stopDistance
 					and enemy:GetAttribute("Attacking") == false
 				then
+					if idlePlay.IsPlaying then
+						idlePlay:Stop()
+						runPlay:Play()
+						runPlay:AdjustSpeed(0.75)
+					end
 					enemyHum:Move(direction)
 				else
 					enemyHum:Move(Vector3.new())
+					if not idlePlay.IsPlaying then
+						runPlay:Stop()
+						idlePlay:Play()
+					end
 				end
 				if distance < stopDistance and enemy:GetAttribute("Attacking") == false then
 					enemy:SetAttribute("Attacking", true)

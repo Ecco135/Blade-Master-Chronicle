@@ -83,18 +83,6 @@ local function prepArena(player)
 	WaveInitEvent:Fire(player)
 end
 
-local function clearArena(player)
-	for i, arena in pairs(ArenaConfig.ArenaInfo) do
-		if arena.player.Name == playerName then
-			arena.arena:Destroy()
-			task.wait(1)
-			ArenaConfig.ArenaInfo[i] = {}
-			ArenaConfig.ArenaInfo[i].occupied = false
-			break
-		end
-	end
-end
-
 WaveClearEvent.Event:Connect(function(player)
 	for i, arena in pairs(ArenaConfig.ArenaInfo) do
 		if arena.player == player and arena.alive == true then
@@ -116,14 +104,6 @@ PlayerDiedEvent.Event:Connect(function(playerName)
 			arena.alive = false
 			arena.player.PlayerGui.ContinueUI.Enabled = true
 			arena.player.Character.Sword:Destroy()
-
-			--[[
-			task.wait(7)
-			arena.arena:Destroy()
-			task.wait(1)
-			ArenaConfig.ArenaInfo[i] = {}
-			ArenaConfig.ArenaInfo[i].occupied = false
-			]]
 			break
 		end
 	end
