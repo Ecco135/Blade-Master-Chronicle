@@ -61,7 +61,6 @@ WaveInitEvent.Event:Connect(function(player)
 end)
 
 local function onEnemyAdded(enemy)
-	enemy:SetAttribute("")
 	local enemyHum = enemy:WaitForChild("Humanoid")
 	local sword = enemy:WaitForChild("Sword")
 	connection[enemy] = sword.BladeBox.Touched:Connect(function(otherPart)
@@ -83,11 +82,10 @@ local function onEnemyAdded(enemy)
 		local Enemyroot = enemy.PrimaryPart
 		if ArenaConfig.ArenaInfo[arenaNo].alive then
 			local distance, direction = getPlayerHeadings(Enemyroot, ArenaConfig.ArenaInfo[arenaNo].player)
-			if distance then
+			if distance and enemy.stunt.Value == false then
 				if
-					distance <= chaseDistance
-					and distance >= stopDistance
-					and enemy:GetAttribute("Attacking") == false
+					--distance <= chaseDistance
+					distance >= stopDistance and enemy:GetAttribute("Attacking") == false
 				then
 					if idlePlay.IsPlaying then
 						idlePlay:Stop()
@@ -106,13 +104,16 @@ local function onEnemyAdded(enemy)
 					enemy:SetAttribute("Attacking", true)
 					task.wait(0.5)
 					local attackPlay = enemyHum:LoadAnimation(slashAni)
-					attackPlay.Priority = Enum.AnimationPriority.Action2
+					attackPlay.Priority = Enum.AnimationPriority.Action
 					attackPlay:AdjustSpeed(attackPlay.Length / 15)
-					attackPlay:Play()
-					sword.BladeBox.CanTouch = true
+					if enemy.stunt.Value == false then
+						attackPlay:Play()
+						sword.BladeBox.CanTouch = true
 
-					attackPlay.keyframeReached:Wait()
-					sword.BladeBox.CanTouch = false
+						attackPlay.Stopped:Wait()
+						sword.BladeBox.CanTouch = false
+					end
+
 					task.wait(1)
 					enemy:SetAttribute("Attacking", false)
 				end

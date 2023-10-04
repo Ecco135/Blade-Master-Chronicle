@@ -19,8 +19,6 @@ local QuestEvent = ReplicatedStorage.Event.QuestEvent
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
 
 local shiftKeyP = false
-local WalkSpeed = 16
-local RunSpeed = 25
 local DashRunKey = Enum.KeyCode.LeftShift
 local walkFOV = 70
 local runFOV = 80
@@ -34,13 +32,13 @@ local function DashRun(_, inputState)
 		dashConfig.dash()
 		if shiftKeyP then
 			TweenCamConfig.TweenCamera(runFOV)
-			Humanoid.WalkSpeed = RunSpeed
+			Humanoid.WalkSpeed = dashConfig.RunSpeed
 		end
 	end
 	if inputState == Enum.UserInputState.End then
 		shiftKeyP = false
 		TweenCamConfig.TweenCamera(walkFOV)
-		Humanoid.WalkSpeed = WalkSpeed
+		Humanoid.WalkSpeed = dashConfig.WalkSpeed
 	end
 end
 local function airJump()
@@ -69,16 +67,14 @@ local function airJumpState(_oldState, newState)
 end
 
 local function QuestStartupSequence()
-	--local playerControl = require(Player.PlayerScripts.PlayerModule):GetControls()
-	--playerControl:Disable()
+	Humanoid.WalkSpeed = 0
 	Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 	task.wait(0.5)
 	for i = 1, 5, 1 do
 		local animationTrack = CombatConfig.playAnimationFromServer(CombatConfig.swordL[i])
-		animationTrack.KeyframeReached:Wait()
+		animationTrack.Stopped:Wait()
 	end
-
-	--playerControl:Enable(true)
+	Humanoid.WalkSpeed = dashConfig.WalkSpeed
 end
 ContextActionService:BindAction("DashRun", DashRun, false, DashRunKey)
 Humanoid.StateChanged:Connect(airJumpState)

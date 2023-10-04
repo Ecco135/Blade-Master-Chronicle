@@ -22,12 +22,17 @@ local dashFOV = 95
 local _dashCDduration = 1
 local _dashDuration = 0.3
 local _dashSpeed = 50
+local WalkSpeed = 16
+local RunSpeed = 25
 DashConfig.dashCD = false
+DashConfig.dashDuration = _dashDuration
+DashConfig.WalkSpeed = WalkSpeed
+DashConfig.RunSpeed = RunSpeed
 
 local DashEvent = ReplicatedStorage.Event:WaitForChild("DashEvent")
 
 local function IsDashAllowed()
-	if DashConfig.dashCD then
+	if DashConfig.dashCD or Character.stunt.value == true then
 		return
 	end
 	return true
@@ -60,8 +65,8 @@ local function collisioncheck(other, limb)
 			or limb == Character.Head
 			or limb == Character.LeftUpperArm
 			or limb == Character.RightUpperArm
-			or limb == root
-			or limb == Character.LowerTorso
+			or limb == root --or limb == Character.LowerTorso
+
 		)
 	then
 		CombatConfig.slashdebounce = false

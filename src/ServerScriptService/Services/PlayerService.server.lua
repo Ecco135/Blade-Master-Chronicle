@@ -7,6 +7,7 @@ local FirstSpawn = Workspace.Lobby.Spawns:WaitForChild("FirstSpawn")
 
 --local PhysicsConfig = require(ReplicatedStorage.Shared.Modules.PhysicsConfig)
 Players.CharacterAutoLoads = false
+print("Player Service Loaded")
 
 local function onCharacterAdded(character)
 	local HumanoidRootPart = character.HumanoidRootPart
@@ -15,6 +16,18 @@ local function onCharacterAdded(character)
 	local attachment = Instance.new("Attachment")
 	attachment.Name = "LinearVelocityAttachment0"
 	attachment.Parent = HumanoidRootPart
+
+	local dashCD = Instance.new("BoolValue", character)
+	dashCD.Name = "dashCD"
+	dashCD.Value = false
+
+	local stunt = Instance.new("BoolValue", character)
+	stunt.Name = "stunt"
+	stunt.Value = false
+
+	local stuntTime = Instance.new("NumberValue", character)
+	stuntTime.Name = "stuntTime"
+	stuntTime.Value = 0
 
 	local LinearVelocity = Instance.new("LinearVelocity")
 	LinearVelocity.Attachment0 = attachment
