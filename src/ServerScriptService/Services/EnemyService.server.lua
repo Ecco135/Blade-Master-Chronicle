@@ -37,7 +37,7 @@ WaveInitEvent.Event:Connect(function(player)
 			local enemyCount = 10 * (1.2 ^ (arena.wave - 1))
 			for j = 1, enemyCount, 1 do
 				while arena.wavegen == false do
-					task.wait(3)
+					task.wait(1)
 					if arena.eCount < 50 then
 						arena.wavegen = true
 					end

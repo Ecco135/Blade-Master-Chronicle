@@ -7,7 +7,7 @@ local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local root = Character:WaitForChild("HumanoidRootPart")
 local airJumpAni = Character:WaitForChild("MotionAni").AirJumpAnimation
-local airJumpPlay = Humanoid:LoadAnimation(airJumpAni)
+local airJumpPlay = Humanoid.Animator:LoadAnimation(airJumpAni)
 
 local dashConfig = require(script.Parent.Parent.Modules.DashConfig)
 local TweenCamConfig = require(script.Parent.Parent.Modules.TweenCamConfig)
@@ -51,6 +51,7 @@ local function airJump()
 			task.spawn(function()
 				doubleJumpCount = 1
 			end)
+			CombatConfig.slashCount = 5
 		end
 	end
 end
@@ -63,6 +64,7 @@ local function airJumpState(_oldState, newState)
 	if newState == Enum.HumanoidStateType.Landed then
 		ContextActionService:UnbindAction("airJump")
 		doubleJumpCount = 0
+		CombatConfig.slashCount = 1
 	end
 end
 

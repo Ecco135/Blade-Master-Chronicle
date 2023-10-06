@@ -19,7 +19,7 @@ function CombatDamage.DamageCount(Char, otherPart)
 	end
 
 	local Hum = nil
-	if otherPart then
+	if otherPart.Parent then
 		Hum = otherPart.Parent:FindFirstChild("Humanoid")
 	end
 

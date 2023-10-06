@@ -24,6 +24,7 @@ function CameraUpdate()
 	root.CFrame = CFrame.fromMatrix(root.Position, lookingCFrame.XVector, lookingCFrame.YVector)
 end
 
+--[[
 Character.ChildAdded:Connect(function(child)
 	if child.name == "Sword" then
 		focusControl()
@@ -31,6 +32,7 @@ Character.ChildAdded:Connect(function(child)
 		--RunService:BindToRenderStep("CameraUpdate", Enum.RenderPriority.Camera.Value, CameraUpdate)
 	end
 end)
+
 Character.ChildRemoved:Connect(function(child)
 	if child.name == "Sword" then
 		DefaultControl()
@@ -38,3 +40,4 @@ Character.ChildRemoved:Connect(function(child)
 		--RunService:UnbindFromRenderStep("CameraUpdate")
 	end
 end)
+]]

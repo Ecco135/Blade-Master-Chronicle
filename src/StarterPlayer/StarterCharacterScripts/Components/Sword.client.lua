@@ -3,6 +3,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local runService = game:GetService("RunService")
 local TS = game:GetService("TweenService")
 local debris = game:GetService("Debris")
+local UIS = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
 local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -23,6 +25,9 @@ local Sword = nil
 local idlePlay = nil
 local runPlay = nil
 local runConnect = nil
+local blastWave = false
+local blastConnect = nil
+CombatConfig.slashCount = 1
 
 local textures = { -- Slash
 	"rbxassetid://8896641723", --9
@@ -41,12 +46,15 @@ local textures = { -- Slash
 }
 
 local swordL = {}
+local slashPlay = {}
 for _, v in pairs(Character.MotionAni.SwordL:GetChildren()) do
+	local animator = Humanoid:FindFirstChildOfClass("Animator")
 	swordL[tonumber(v.name:sub(-1))] = v
+	slashPlay[tonumber(v.name:sub(-1))] = animator:LoadAnimation(v)
 end
 
-local swordslashT = 0.1
-local swordstep = { 1.5, 1.7, 1.7, 1.7, 0 }
+--local swordslashT = 0.1
+local swordstep = { 15, 17, 17, 17, 0 }
 
 local function slashconnect(otherPart)
 	if otherPart.Parent ~= Sword.Parent then
@@ -54,79 +62,130 @@ local function slashconnect(otherPart)
 	end
 end
 
+local function groundBlast(_, newState)
+	local m1pressed = false
+	for _, v in pairs(UIS:GetMouseButtonsPressed()) do
+		if v.UserInputType.Name == "MouseButton1" then
+			m1pressed = true
+		end
+	end
+	if newState == Enum.HumanoidStateType.Running and blastWave == false and m1pressed then
+		print("blast wave")
+		blastWave = true
+		local blastDome = Instance.new("Part")
+		blastDome.Shape = "Ball"
+		blastDome.Size = Vector3.new(0.01, 0.01, 0.01)
+		blastDome.Transparency = 0.5
+		blastDome.Anchored = true
+		blastDome.CanCollide = false
+		blastDome.CanTouch = true
+		blastDome.Position = HumanoidRootPart.Position
+		blastDome.Parent = Sword.Parent
+
+		blastDome.Touched:Connect(slashconnect)
+
+		TS:Create(blastDome, TweenInfo.new(0.3, Enum.EasingStyle.Exponential), { Size = Vector3.new(20, 20, 20) })
+			:Play()
+
+		debris:AddItem(blastDome, 0.3)
+		task.wait(1)
+		blastWave = false
+		blastConnect:Disconnect()
+	end
+end
+
 local function playAnimationFromServer(animationID)
+	--[[
 	local animator = Humanoid:FindFirstChildOfClass("Animator")
 	if animator then
 		animationTrack = Humanoid:LoadAnimation(animationID)
 		animationTrack.Priority = Enum.AnimationPriority.Action2
 		animationTrack:Play()
 	end
-	return animationTrack
+	]]
+	--animationTrack = slashPlay[animationID]
+	--animationTrack:Play()
+	slashPlay[animationID]:Play()
+	return slashPlay[animationID]
 end
 
 local function comboRefresh()
 	task.wait(0.6)
 	if tick() - nextslashinput > 0.6 then
-		CombatConfig.slashCount = 0
-
+		CombatConfig.slashCount = 1
+		if blastConnect then
+			blastConnect:Disconnect()
+		end
 		CombatConfig.slashdebounce = false
 	end
 end
 
 local function slashBox(comboN)
-	local HitBox = ReplicatedStorage.VFX.MotionEffect.HitBox:Clone()
-	HitBox:WaitForChild("HitBox").Touched:Connect(slashconnect)
+	local SlashEffect = ReplicatedStorage.VFX.MotionEffect.SlashEffect:Clone()
+	local HitBox2 = nil
+	local HitBox1 = ReplicatedStorage.VFX.MotionEffect.HitBox:Clone()
+	debris:AddItem(SlashEffect, 0.6)
+
+	HitBox1:WaitForChild("HitBox").Touched:Connect(slashconnect)
 	if comboN == 1 then
 		task.wait(0.1)
-		HitBox.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, 0, math.rad(30))
+		SlashEffect.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, 0, math.rad(30))
+		HitBox1.PrimaryPart.CFrame = SlashEffect.PrimaryPart.CFrame
 		TS:Create(
-			HitBox.PrimaryPart,
+			SlashEffect.PrimaryPart,
 			TweenInfo.new(0.35),
-			{ CFrame = HitBox.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
+			{ CFrame = SlashEffect.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
 		):Play()
-		TS:Create(HitBox.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
+		TS:Create(SlashEffect.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
 	elseif comboN == 2 then
 		task.wait(0.1)
-		HitBox.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, 0, math.rad(150))
+		SlashEffect.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, 0, math.rad(150))
+		HitBox1.PrimaryPart.CFrame = SlashEffect.PrimaryPart.CFrame
 		TS:Create(
-			HitBox.PrimaryPart,
+			SlashEffect.PrimaryPart,
 			TweenInfo.new(0.35),
-			{ CFrame = HitBox.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
+			{ CFrame = SlashEffect.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
 		):Play()
-		TS:Create(HitBox.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
+		TS:Create(SlashEffect.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
 	elseif comboN == 3 then
 		task.wait(0.1)
-		HitBox.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, 0, math.rad(0))
+		SlashEffect.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, math.rad(0), 0)
+		HitBox1.PrimaryPart.CFrame = SlashEffect.PrimaryPart.CFrame
+		HitBox2 = ReplicatedStorage.VFX.MotionEffect.HitBox:Clone()
+		HitBox2:WaitForChild("HitBox").Touched:Connect(slashconnect)
+		HitBox2.PrimaryPart.CFrame = HitBox1.PrimaryPart.CFrame * CFrame.fromEulerAnglesXYZ(0, math.rad(180), 0)
 		TS:Create(
-			HitBox.PrimaryPart,
+			SlashEffect.PrimaryPart,
 			TweenInfo.new(0.35),
-			{ CFrame = HitBox.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
+			{ CFrame = SlashEffect.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
 		):Play()
-		TS:Create(HitBox.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
+		TS:Create(SlashEffect.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
 	elseif comboN == 4 then
 		task.wait(0.1)
-		HitBox.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, 0, math.rad(-90))
+		SlashEffect.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, 0, math.rad(-90))
+		HitBox1.PrimaryPart.CFrame = SlashEffect.PrimaryPart.CFrame
 		TS:Create(
-			HitBox.PrimaryPart,
+			SlashEffect.PrimaryPart,
 			TweenInfo.new(0.35),
-			{ CFrame = HitBox.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
+			{ CFrame = SlashEffect.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
 		):Play()
-		TS:Create(HitBox.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
+		TS:Create(SlashEffect.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
 	elseif comboN == 5 then
 		task.wait(0.1)
-		HitBox.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, 0, math.rad(90))
+		SlashEffect.PrimaryPart.CFrame = HumanoidRootPart.CFrame * CFrame.fromEulerAnglesXYZ(0, 0, math.rad(90))
+		HitBox1.PrimaryPart.CFrame = SlashEffect.PrimaryPart.CFrame
 		TS:Create(
-			HitBox.PrimaryPart,
+			SlashEffect.PrimaryPart,
 			TweenInfo.new(0.35),
-			{ CFrame = HitBox.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
+			{ CFrame = SlashEffect.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(178), 0) }
 		):Play()
-		TS:Create(HitBox.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
+		TS:Create(SlashEffect.Slash, TweenInfo.new(0.35), { Transparency = 1 }):Play()
 	end
 
 	local connection
 	local count = 1
 	connection = runService.RenderStepped:Connect(function()
-		HitBox.Slash.Mesh.TextureId = textures[count]
+		SlashEffect.Slash.Mesh.TextureId = textures[count]
 		count = count + 1
 		if count > #textures then
 			count = 1
@@ -140,21 +199,28 @@ local function slashBox(comboN)
 	patCon = runService.RenderStepped:Connect(function()
 		if tick() - patInit < 0.3 then
 			particleC = particleC + 1
-			for _, v in pairs(HitBox.Effect1:GetChildren()) do
+			for _, v in pairs(SlashEffect.Effect1:GetChildren()) do
 				if v:IsA("ParticleEmitter") and particleC % 2 == 0 then
 					v:Emit(1)
 				end
 			end
 		else
 			patCon:Disconnect()
-			HitBox.HitBox.CanTouch = false
 		end
 	end)
 
-	TS:Create(HitBox.Slash.light, TweenInfo.new(0.3), { Brightness = 0 }):Play()
-	HitBox.Parent = Sword.Parent
-
-	debris:AddItem(HitBox, 0.6)
+	TS:Create(SlashEffect.Slash.light, TweenInfo.new(0.3), { Brightness = 0 }):Play()
+	SlashEffect.Parent = Sword.Parent
+	HitBox1.Parent = Sword.Parent
+	HitBox1.HitBox.CanTouch = true
+	HitBox1.HitBox.Touched:Connect(slashconnect)
+	if HitBox2 then
+		HitBox2.Parent = Sword.Parent
+		HitBox2.HitBox.CanTouch = true
+		HitBox2.HitBox.Touched:Connect(slashconnect)
+	end
+	debris:AddItem(HitBox1, 0.1)
+	debris:AddItem(HitBox2, 0.1)
 end
 
 local function SwordL(_, inputState)
@@ -169,9 +235,7 @@ local function SwordL(_, inputState)
 		if Humanoid.WalkSpeed == dashConfig.WalkSpeed then
 			Humanoid.WalkSpeed = 0.1
 		end
-		if Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
-			CombatConfig.slashCount = 5
-		end
+
 		if CombatConfig.slashCount < 5 then
 			if animationstate == true then
 				if CombatConfig.slashCount ~= 4 then
@@ -185,11 +249,18 @@ local function SwordL(_, inputState)
 					return
 				end
 			end
-			CombatConfig.slashCount = CombatConfig.slashCount + 1
+			if Character.stunt.Value == true then
+				return
+			end
+
+			--if Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+			--	CombatConfig.slashCount = 5
+			--end
 		end
 
 		animationstate = true
-		animationTrack = playAnimationFromServer(swordL[CombatConfig.slashCount])
+		--animationTrack = playAnimationFromServer(swordL[CombatConfig.slashCount])
+		animationTrack = playAnimationFromServer(CombatConfig.slashCount)
 		Sword.BladeBox.CanTouch = true
 		slashBox(CombatConfig.slashCount)
 
@@ -198,6 +269,8 @@ local function SwordL(_, inputState)
 			Humanoid.JumpPower = 60
 			Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 		elseif CombatConfig.slashCount == 5 then
+			blastConnect = Humanoid.StateChanged:Connect(groundBlast)
+
 			HumanoidRootPart:ApplyImpulse(Vector3.new(0, 1000, 0))
 			task.wait(0.1)
 			HumanoidRootPart:ApplyImpulse(Vector3.new(0, -5000, 0))
@@ -207,21 +280,20 @@ local function SwordL(_, inputState)
 
 		local direction = HumanoidRootPart.CFrame.LookVector
 		local planeDirection = Vector2.new(direction.X, direction.Z)
-		HumanoidRootPart.LinearVelocity.PlaneVelocity = swordstep[CombatConfig.slashCount]
-			/ swordslashT
-			* planeDirection
-		dashConfig.dashCD = true
+		HumanoidRootPart.LinearVelocity.PlaneVelocity = swordstep[CombatConfig.slashCount] * planeDirection
 		Humanoid.AutoRotate = false
 		HumanoidRootPart.LinearVelocity.Enabled = true
 
 		if CombatConfig.slashCount < 5 then
+			CombatConfig.slashCount = CombatConfig.slashCount + 1
 			CombatConfig.slashdebounce = false
 		end
 
+		dashConfig.dashCD = true
 		task.spawn(comboRefresh)
 
 		if CombatConfig.slashCount == 5 then
-			animationTrack.Ended:Wait()
+			animationTrack.KeyframeReached:Wait()
 		else
 			animationTrack.KeyframeReached:Wait()
 		end
@@ -279,11 +351,10 @@ Character.ChildAdded:Connect(function(child)
 		print("sword combat binded")
 		Sword = child
 		ContextActionService:BindAction("SwordL", SwordL, false, Enum.UserInputType.MouseButton1)
-		--Sword:WaitForChild("BladeBox").Touched:Connect(slashconnect)
 		local idleAnimation = Sword:WaitForChild("Animation").Idle
-		idlePlay = Humanoid:LoadAnimation(idleAnimation)
+		idlePlay = Humanoid.Animator:LoadAnimation(idleAnimation)
 		local runAnimation = Sword.Animation.Run
-		runPlay = Humanoid:LoadAnimation(runAnimation)
+		runPlay = Humanoid.Animator:LoadAnimation(runAnimation)
 		runConnect = runService.Heartbeat:Connect(movementAni)
 	end
 end)

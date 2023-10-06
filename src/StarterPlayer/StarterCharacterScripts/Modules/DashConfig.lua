@@ -12,7 +12,7 @@ local TweenCamConfig = require(script.Parent.TweenCamConfig)
 local CombatConfig = require(script.Parent.CombatConfig)
 
 local dashAni = Character.MotionAni:WaitForChild("DashAnimation")
-local dashPlay = Humanoid:LoadAnimation(dashAni)
+local dashPlay = Humanoid.Animator:LoadAnimation(dashAni)
 dashPlay.Priority = Enum.AnimationPriority.Action3
 local dashSound = ReplicatedStorage.VFX.MotionSound:WaitForChild("Dash")
 
@@ -87,7 +87,7 @@ function DashConfig.dash()
 		root.CFrame = CFrame.new(root.Position, Vector3.new(dashVelocity.X, 0, dashVelocity.Y) * 1000)
 		root.LinearVelocity.PlaneVelocity = dashVelocity
 		root.LinearVelocity.Enabled = true
-		CombatConfig.slashCount = 0
+		CombatConfig.slashCount = 1
 		CombatConfig.slashdebounce = true
 		dashPlay:Play()
 		dashPlay:AdjustSpeed(dashPlay.Length / _dashDuration)
