@@ -20,8 +20,3 @@ end
 -- player - waves
 
 return ArenaConfig
-
---need to capture arena numbering
---need to capture arena spawn area
---need to capture player bind to arena
---track which arena number is taken

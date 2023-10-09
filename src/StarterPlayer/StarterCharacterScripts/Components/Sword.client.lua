@@ -12,6 +12,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
 local dashConfig = require(script.Parent.Parent:WaitForChild("Modules").DashConfig)
+local groundSmash = require(script.Parent.Parent:WaitForChild("Modules").GroundSmashVisual)
 local MovementConfig = require(script.Parent.Parent.Modules.MovementConfig)
 local CombatConfig = require(script.Parent.Parent.Modules.CombatConfig)
 
@@ -72,6 +73,10 @@ local function groundBlast(_, newState)
 	if newState == Enum.HumanoidStateType.Running and blastWave == false and m1pressed then
 		print("blast wave")
 		blastWave = true
+
+		local groundPos = HumanoidRootPart.Position - Vector3.new(0, HumanoidRootPart.Position.Y + 1.5, 0)
+
+		task.spawn(groundSmash.createDebris, groundPos, 10)
 		local blastDome = Instance.new("Part")
 		blastDome.Shape = "Ball"
 		blastDome.Size = Vector3.new(0.01, 0.01, 0.01)
@@ -79,7 +84,7 @@ local function groundBlast(_, newState)
 		blastDome.Anchored = true
 		blastDome.CanCollide = false
 		blastDome.CanTouch = true
-		blastDome.Position = HumanoidRootPart.Position
+		blastDome.Position = groundPos
 		blastDome.Parent = Sword.Parent
 
 		blastDome.Touched:Connect(slashconnect)

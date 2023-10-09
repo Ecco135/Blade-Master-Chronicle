@@ -7,10 +7,17 @@ local debris = game:GetService("Debris")
 local ts = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 local runService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local Character = player.Character
+local cam = workspace.CurrentCamera
 
 local jumpSound = jumpEffectT:WaitForChild("AirJump")
 
 local dashConfig = require(script.Parent.Parent:WaitForChild("Modules").DashConfig)
+local cameraShake = require(script.Parent.Parent.Modules.CameraShake)
+
+local newCameraShake = cameraShake.new(cam, Character)
 
 local stateCheckConnect
 
@@ -70,9 +77,14 @@ function DamageVFX(Char, otherPart, hitForce)
 	Char.Sword.BladeBox.CanTouch = false
 	Char.Humanoid.WalkSpeed = 0
 	local DamageAni = Char.MotionAni:WaitForChild("DamageAnimation")
-	local damagePlay = Char.Humanoid:LoadAnimation(DamageAni)
+	local damagePlay = Char.Humanoid.Animator:LoadAnimation(DamageAni)
 	damagePlay.Priority = Enum.AnimationPriority.Action4
 	damagePlay:Play()
+	local plr = Players:GetPlayerFromCharacter(Char)
+
+	if plr == player then
+		newCameraShake:shake(1)
+	end
 
 	if Char.stuntTime.Value == 0 then
 		Char.stuntTime.Value = tick()
